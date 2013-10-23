@@ -30,7 +30,7 @@
 
 #define SERVER_STRING "Server: jdbhttpd/0.1.0\r\n"
 
- #define PORT 80
+#define PORT 80 
 
 void accept_request(int);
 void bad_request(int);
@@ -65,7 +65,6 @@ void accept_request(int client)
 
  numchars = get_line(client, buf, sizeof(buf));
  i = 0; j = 0;
-printf("doing"); 
  while (!ISspace(buf[j]) && (i < sizeof(method) - 1))
  {
   method[i] = buf[j];
@@ -105,7 +104,7 @@ printf("doing");
   }
  }
 
-printf("Im alive");
+
  sprintf(path, "htdocs%s", url);
  if (path[strlen(path) - 1] == '/')
   strcat(path, "index.html");
@@ -123,12 +122,11 @@ printf("Im alive");
       (st.st_mode & S_IXOTH)    )
    cgi = 1;
   if (!cgi){
-  printf("cgi");
+
    serve_file(client, path);
   
   }else{
-	printf("no cgi");
-   execute_cgi(client, path, method, query_string);
+ execute_cgi(client, path, method, query_string);
   } 
 }
 
@@ -244,7 +242,10 @@ void execute_cgi(int client, const char *path,
  }
 
  sprintf(buf, "HTTP/1.0 200 OK\r\n");
- send(client, buf, strlen(buf), 0);
+ sprintf(buf, "Content-Type: text/html\r\n");
+ sprintf(buf, "\r\n");
+ sprintf(buf, "Fernando if you can see this is because you are GAY!"); 
+send(client, buf, strlen(buf), 0);
 
  if (pipe(cgi_output) < 0) {
   cannot_execute(client);
@@ -486,22 +487,18 @@ int main(void)
 
  server_sock = startup();
  printf("WTF really httpd running on port %d\n", port);
-
  while (1)
  {
-printf("going to create a socket");  
 client_sock = accept(server_sock,
                        (struct sockaddr *)&client_name,
                        &client_name_len);
-printf("OMG");
   if (client_sock == -1)
    error_die("accept");
- printf("accepting requestes"); 
  // accept_request(client_sock); 
  if (pthread_create(&newthread , NULL, accept_request, client_sock) != 0)
    perror("pthread_create");
  }
-printf("closed session");
+
  close(server_sock);
 
  return(0);

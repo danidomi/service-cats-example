@@ -3,7 +3,7 @@ all: Server
 Server: Server.o Cat.o 
 	gcc -o Server Server.o Cat.o 
 
-Server.o: server.c
+Server.o: Server.c
 	gcc -c Server.c
 
 Cat.o: Cat.c
