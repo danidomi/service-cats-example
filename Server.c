@@ -6,8 +6,6 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <sys/stat.h>
-#include "Error.h"
-#include "Error-network.h"
  
 	#define PORT 80 //Port users will be connecting to
 	#define WEBROOT "webroot"   //Webservers root directory

@@ -1,13 +1,13 @@
 all: Server
 
 Server: Server.o Cat.o 
-	gcc Server.o Cat.o -o server
+	gcc -o Server Server.o Cat.o 
 
 Server.o: server.c
 	gcc -c Server.c
 
 Cat.o: Cat.c
-	gcc -c Cat.c Cat.h ICat.h
+	gcc -c Cat.c
 
 clean:
 	rm -rf *.o server

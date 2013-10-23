@@ -4,7 +4,7 @@
 Cat * CatCreate(int age, int something) { 
     Cat * newCat = malloc(sizeof(Cat));
 
-    CatInitialize(newCat);
+    CatInitialize(newCat, age, something);
 
     return newCat;
 }
