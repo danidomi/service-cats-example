@@ -1,4 +1,4 @@
-#include "Cat.h"
+#include "ICat.h"
 
 struct Cat { 
      int age;
