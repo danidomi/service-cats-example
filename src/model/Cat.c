@@ -1,33 +1,14 @@
-#include "Cat.h"
 #include <stdlib.h>
+#include "Cat.h"
 
-// Constructor:
-Cat * CatCreate(int age, int something) {
-    Cat * newCat = malloc(sizeof(Cat));
-
-    CatInitialize(newCat, age, something);
-
-    return newCat;
+Cat * newErrorCat(Error * err) {
+    Cat * cat = malloc(sizeof (Cat));
+    cat->error = err;
+    return cat;
 }
 
-void CatInitialize(Cat * this, int age, int something)
-{
-    this->age = age;
-    this->something = something;
-}
-
-// "Property" setter:
-void CatSetAge(Cat * this, int age) {
-    this->age = age;
-}
-
-// "Property" setter:
-int CatGetAge(Cat * this) {
-    return this->age;
-}
-
-
-void CatFree(Cat * this) { 
-    // Do any other freeing required here.
-    free(this);
+Cat * newErrorMsgCat(char * message) {
+    Cat * cat = malloc(sizeof (Cat));
+    cat->error = new(message);
+    return cat;
 }

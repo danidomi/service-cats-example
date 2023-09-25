@@ -1,8 +1,13 @@
-#include "Repository.h"
+#pragma once
 
-struct Cat { 
-     int age;
-     int something;
-};
+#include "../../framework/error/Error.h"
 
-void CatInitialize(Cat * this, int age, int something);
+typedef struct Cat {
+    int id;
+    int age;
+    char *name;
+    Error *error;
+} Cat;
+
+Cat * newErrorCat(Error * err);
+Cat * newErrorMsgCat(char * message);
