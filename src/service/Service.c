@@ -1,12 +1,17 @@
 #include "Service.h"
-#include "../model/Repository.h"
-#include <stdio.h>
-#include <libc.h>
 
-char* Create(int age, int something){
-    Cat * cat = CatCreate(age, something);
-    CatGetAge(cat);
-    char * result = malloc( 100 * sizeof(char));
-    sprintf(result,"{\"data\":{\"age\":%d}}", CatGetAge(cat));
-    return result;
+Cat * CreateCat(int age, char * name){
+    if (age <= 0 && strlen(name) == 0) {
+        return NULL;
+    }
+    Cat * cat = PersistCat(age,name);
+    return cat;
+}
+
+
+Cat * GetCat(int id){
+    if (id <= 0) {
+        return NULL;
+    }
+    return FindCat(id);
 }
