@@ -11,6 +11,7 @@ Response *handle_api(Request *request) {
         case POST:
             return handlePOST(request);
         default:
+            // default
             return handleGET(request);
     }
 }
@@ -38,6 +39,10 @@ Response *handleGET(Request *request) {
 
     // Convert the Cat struct to JSON using the generic function
     char *json = convertToJson(&catConverter);
+    if (json == NULL) {
+        return NULL;
+    }
+
     char jsonData[1000];
     sprintf(jsonData, "{\"data\":%s}", json);
     response->data = strdup(jsonData);
@@ -72,6 +77,10 @@ Response *handlePOST(Request *request) {
 
     // Convert the Cat struct to JSON using the generic function
     char *json = convertToJson(&catConverter);
+    if (json == NULL) {
+        return NULL;
+    }
+
     char jsonData[1000];
     sprintf(jsonData, "{\"data\":%s}", json);
     response->data = strdup(jsonData);

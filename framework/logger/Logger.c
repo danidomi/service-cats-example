@@ -45,11 +45,14 @@ void logMessage(LogLevel level, const char *format, ...) {
         case ERROR:
             fprintf(logFile, "[ERROR] ");
             break;
+        default:
+            printf("UNKNOWN %s\n", format);
     }
 
-    vfprintf(logFile, format, args);
-    fprintf(logFile, "\n");
+    vfprintf(stderr, format, args);
+    fprintf(stderr, "\n");
 
-    fclose(logFile);
+    // Ensure that the message is immediately printed to stderr
+    fflush(stderr);
     va_end(args);
 }

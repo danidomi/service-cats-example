@@ -1,7 +1,5 @@
 #include "Server.h"
 
-
-
 int main(void) {
     int sockfd, *new_sockfd, yes = 1;
     struct sockaddr_in host_addr, client_addr;      //My address information
@@ -71,52 +69,52 @@ void handle_connection(void *arg) {
     struct sockaddr_in *client_addr_ptr = args->client_addr_ptr;
     unsigned char *ptr, *resource;
     Request *request;
-    char *req;
     char *requestPlain;
     int fd, length;
 
     resource = malloc(50);
-    req = malloc(4000);
-    length = recv_line(sockfd, req);
-    printf("%s\n\n", req);
-    request = parseRequest(req);
+    requestPlain = malloc(4000);
+    length = recv_line(sockfd, requestPlain);
+    logMessage(DEBUG,"%s", requestPlain);
+    request = parseRequest(requestPlain);
     if (request != NULL) {
-        printf("Method: %s\n", request->method);
-        printf("Path: %s\n", request->path);
-        printf("Query Parameters:\n");
+        logMessage(DEBUG,"Method: %d", request->method);
+        logMessage(DEBUG,"Path: %s", request->path);
+        logMessage(DEBUG,"Query Parameters:");
         for (size_t i = 0; i < request->queryParamsCount; i++) {
-            printf("\tKey: %s, Value: %s\n", request->queryParams[i].key, request->queryParams[i].value);
+            logMessage(DEBUG,"\tKey: %s, Value: %s\n", request->queryParams[i].key, request->queryParams[i].value);
         }
     } else {
-        printf("Failed to parse request.\n");
+        logMessage(WARNING, "Failed to parse request.");
     }
-    printf("Got request from %s:%d \"%s\"\n", inet_ntoa(client_addr_ptr->sin_addr),
-           ntohs(client_addr_ptr->sin_port), req);
-    ptr = strstr(req, "HTTP/");     //Search for valid looking request
+    logMessage(DEBUG, "Got request from %s:%d \"%s\"\n", inet_ntoa(client_addr_ptr->sin_addr),
+           ntohs(client_addr_ptr->sin_port), requestPlain);
+    ptr = strstr(requestPlain, "HTTP/");     //Search for valid looking request
     if (ptr == NULL) {       //The this isnt a valid HTTP
-        printf("NOT HTTP!\n");
+        logMessage(WARNING,"NOT HTTP!\n");
     } else if (strcmp(request->path, "/favicon.ico") == 0) {
         handle404(sockfd);
         shutdown(sockfd, SHUT_RDWR);
         return;
     } else {
+        logMessage(DEBUG,"request->path %s %s\n", request->path, get_path());
         if (strcmp(request->path, get_path()) == 0) {
+            logMessage(DEBUG, "Handling /cats");
             Response *response = handle_api(request);
             if (response == NULL) {
-                printf("RESPONSE IS NULL");
+                logMessage(WARNING, "Response is NULL");
                 handle404(sockfd);
                 shutdown(sockfd, SHUT_RDWR);
                 return;
             }
-
-            char *http = malloc(9 + strlen(response->status_code) * sizeof(char));
+            char *http = malloc(10 + strlen(response->status_code) * sizeof(char));
             char *header = malloc(strlen(response->headers[0]) * response->headersCount * sizeof(char));
             char data[1000];
-            //char *data = malloc(strlen(response->data) * sizeof(char));
+            //char *data = malloc(strlen(response->data) * sizeof(char)); // TODO would be better to do something like this!
             sprintf(http, "HTTP/1.0 %s\r\n", response->status_code);
             if (response->headersCount > 0) {
                 for (int i = 0; i < response->headersCount; i++) {
-                    printf("%d\n", i);
+                    logMessage(DEBUG,"%d\n", i);
                     if (i != (response->headersCount - 1)) {
                         sprintf(header, "%s\r\n", response->headers[i]);
                     } else {
@@ -124,7 +122,7 @@ void handle_connection(void *arg) {
                     }
                 }
             }
-            printf("data: %s\n", response->data);
+            logMessage(DEBUG,"data: %s\n", response->data);
             sprintf(data, "%s\r\n", response->data);
             send_string(sockfd, http);
             send_string(sockfd, header);
@@ -161,7 +159,8 @@ int get_file_size(int fd) {
 
 // Definition of function fatal().
 void fatal(char *a) {
-    printf("The string of (a) is: %s\n", a);
+    logMessage(ERROR, "Error: %s\n", a);
+    exit(-1);
 }
 
 /* This function accepts a socket FD and a ptr to the null terminated
