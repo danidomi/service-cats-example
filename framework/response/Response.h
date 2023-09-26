@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #define MAX_HEADERS 20
 
 typedef struct Response {

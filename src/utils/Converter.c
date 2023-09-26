@@ -3,6 +3,10 @@
 // Function to convert a Cat struct to JSON
 char *toJson(Cat *data) {
     Cat *cat = (Cat *)data;
+    if (cat == NULL) {
+        return NULL;
+    }
+
     char *json = (char *)malloc(256); // Allocate memory for the JSON string
     if (json == NULL) {
         return NULL; // Memory allocation failed
