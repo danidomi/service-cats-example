@@ -12,6 +12,9 @@
 #include "request/Request.h"
 #include "response/Response.h"
 
+#define EOL "\r\n" // End-Of-Line byte sequence
+#define EOL_SIZE 2
+
 typedef int bool;
 #define true 1
 #define false 0
@@ -19,6 +22,7 @@ typedef int bool;
 #ifndef PORT
 #define PORT 8080 //Port users will be connecting to
 #endif
+
 // Define the ThreadArgs structure globally
 struct ThreadArgs {
     int sockfd;
@@ -32,7 +36,7 @@ void fatal(char *a);
 int send_string(int sockfd, unsigned char *buffer);
 int recv_line(int sockfd, unsigned char *dest_buffer);
 
-void handle404(int sockfd);
+void handle_404(int sockfd);
 
 
 // Implement this methods

@@ -93,7 +93,7 @@ void handle_connection(void *arg) {
     if (ptr == NULL) {       //The this isnt a valid HTTP
         logMessage(WARNING,"NOT HTTP!\n");
     } else if (strcmp(request->path, "/favicon.ico") == 0) {
-        handle404(sockfd);
+        handle_404(sockfd);
         shutdown(sockfd, SHUT_RDWR);
         return;
     } else {
@@ -103,7 +103,7 @@ void handle_connection(void *arg) {
             Response *response = handle_api(request);
             if (response == NULL) {
                 logMessage(WARNING, "Response is NULL");
-                handle404(sockfd);
+                handle_404(sockfd);
                 shutdown(sockfd, SHUT_RDWR);
                 return;
             }
@@ -131,14 +131,14 @@ void handle_connection(void *arg) {
             free(header);
             //free(data);
         } else {
-            handle404(sockfd);
+            handle_404(sockfd);
         } //Close else printf 200 block
     }//End if block for valid HTTP
     shutdown(sockfd, SHUT_RDWR);    //close socket ever so gingerly
 }//Close void handle_connection
 
 
-void handle404(int sockfd) {
+void handle_404(int sockfd) {
     send_string(sockfd, "HTTP/1.0 404 Not Found\r\n");
     send_string(sockfd, "Server: Tiny webserver \r\n\r\n");
     send_string(sockfd, "<html><head><title>404 not found</title></head>");
@@ -181,8 +181,6 @@ int send_string(int sockfd, unsigned char *buffer) {
 }
 
 int recv_line(int sockfd, unsigned char *dest_buffer) {
-#define EOL "\r\n" // End-Of-Line byte sequence
-#define EOL_SIZE 2
     unsigned char *ptr;
     int eol_matched = 0;
 
