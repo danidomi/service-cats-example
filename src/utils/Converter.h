@@ -6,8 +6,8 @@
 // Define a generic struct for JSON conversion
 typedef struct {
     void *data; // Pointer to the struct data
-    char *(*toJson)(Cat *data); // Function pointer to the JSON conversion function
+    char *(*to_json)(Cat *data); // Function pointer to the JSON conversion function
 } JsonConverter;
 
-char *convertToJson(const JsonConverter *converter);
-char *toJson(Cat *data);
+char *convert_to_json(const JsonConverter *converter);
+char *to_json(Cat *data);

@@ -14,4 +14,4 @@ typedef struct DatabaseConfig {
     char name[MAX_LINE_LENGTH];
 }DatabaseConfig;
 
-DatabaseConfig * readPropertyFile(const char *filename);
+DatabaseConfig * read_property_file(const char *filename);

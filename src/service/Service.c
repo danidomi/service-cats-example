@@ -1,17 +1,17 @@
 #include "Service.h"
 
-Cat * CreateCat(int age, char * name){
+Cat * create_cat(int age, char * name){
     if (age <= 0 && strlen(name) == 0) {
         return NULL;
     }
-    Cat * cat = PersistCat(age,name);
+    Cat * cat = persist_cat(age,name);
     return cat;
 }
 
 
-Cat * GetCat(int id){
+Cat * get_cat(int id){
     if (id <= 0) {
         return NULL;
     }
-    return FindCat(id);
+    return find_cat(id);
 }

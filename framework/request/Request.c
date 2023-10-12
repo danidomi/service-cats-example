@@ -3,7 +3,7 @@
 #include <string.h>
 #include "Request.h"
 
-Request *parseRequest(char *req) {
+Request *parse_request(char *req) {
     if (req == NULL) {
         return NULL;
     }
@@ -116,7 +116,7 @@ Request *parseRequest(char *req) {
 }
 
 // Function to get a query parameter value by key
-char *getQueryParamValue(const Request *request, const char *key) {
+char *get_query_param_value(const Request *request, const char *key) {
     if (request == NULL || key == NULL) {
         return NULL;
     }

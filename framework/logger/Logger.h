@@ -17,4 +17,4 @@ typedef enum {
     ERROR
 } LogLevel;
 
-void logMessage(LogLevel level, const char *format, ...);
+void log_message(LogLevel level, const char *format, ...);

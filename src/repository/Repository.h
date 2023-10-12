@@ -6,5 +6,5 @@
 #include "../../framework/logger/Logger.h"
 #include "../../framework/error/Error.h"
 
-Cat * FindCat(int id);
-Cat * PersistCat(int age, char* name);
+Cat * find_cat(int id);
+Cat * persist_cat(int age, char* name);

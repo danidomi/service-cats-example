@@ -5,5 +5,5 @@
 #include <string.h>
 #include "../utils/Converter.h"
 
-Response *handleGET(Request *request);
-Response *handlePOST(Request *request);
+Response *handle_get(Request *request);
+Response *handle_post(Request *request);
