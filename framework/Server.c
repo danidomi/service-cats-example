@@ -5,7 +5,7 @@ int main(void) {
     struct sockaddr_in host_addr, client_addr;      //My address information
     socklen_t sin_size;
 
-    logMessage(INFO,"Accepting web requests on port %d\n", PORT);
+    log_message(INFO,"Accepting web requests on port %d\n", PORT);
 
     if ((sockfd = socket(PF_INET, SOCK_STREAM, 0)) == -1)
         fatal("in socket");
@@ -75,34 +75,34 @@ void handle_connection(void *arg) {
     resource = malloc(50);
     requestPlain = malloc(4000);
     length = recv_line(sockfd, requestPlain);
-    logMessage(DEBUG,"%s", requestPlain);
-    request = parseRequest(requestPlain);
+    log_message(DEBUG,"%s", requestPlain);
+    request = parse_request(requestPlain);
     if (request != NULL) {
-        logMessage(DEBUG,"Method: %d", request->method);
-        logMessage(DEBUG,"Path: %s", request->path);
-        logMessage(DEBUG,"Query Parameters:");
+        log_message(DEBUG,"Method: %d", request->method);
+        log_message(DEBUG,"Path: %s", request->path);
+        log_message(DEBUG,"Query Parameters:");
         for (size_t i = 0; i < request->queryParamsCount; i++) {
-            logMessage(DEBUG,"\tKey: %s, Value: %s\n", request->queryParams[i].key, request->queryParams[i].value);
+            log_message(DEBUG,"\tKey: %s, Value: %s\n", request->queryParams[i].key, request->queryParams[i].value);
         }
     } else {
-        logMessage(WARNING, "Failed to parse request.");
+        log_message(WARNING, "Failed to parse request.");
     }
-    logMessage(DEBUG, "Got request from %s:%d \"%s\"\n", inet_ntoa(client_addr_ptr->sin_addr),
+    log_message(DEBUG, "Got request from %s:%d \"%s\"\n", inet_ntoa(client_addr_ptr->sin_addr),
            ntohs(client_addr_ptr->sin_port), requestPlain);
     ptr = strstr(requestPlain, "HTTP/");     //Search for valid looking request
     if (ptr == NULL) {       //The this isnt a valid HTTP
-        logMessage(WARNING,"NOT HTTP!\n");
+        log_message(WARNING,"NOT HTTP!\n");
     } else if (strcmp(request->path, "/favicon.ico") == 0) {
         handle_404(sockfd);
         shutdown(sockfd, SHUT_RDWR);
         return;
     } else {
-        logMessage(DEBUG,"request->path %s %s\n", request->path, get_path());
+        log_message(DEBUG,"request->path %s %s\n", request->path, get_path());
         if (strcmp(request->path, get_path()) == 0) {
-            logMessage(DEBUG, "Handling /cats");
+            log_message(DEBUG, "Handling /cats");
             Response *response = handle_api(request);
             if (response == NULL) {
-                logMessage(WARNING, "Response is NULL");
+                log_message(WARNING, "Response is NULL");
                 handle_404(sockfd);
                 shutdown(sockfd, SHUT_RDWR);
                 return;
@@ -114,7 +114,7 @@ void handle_connection(void *arg) {
             sprintf(http, "HTTP/1.0 %s\r\n", response->status_code);
             if (response->headersCount > 0) {
                 for (int i = 0; i < response->headersCount; i++) {
-                    logMessage(DEBUG,"%d\n", i);
+                    log_message(DEBUG,"%d\n", i);
                     if (i != (response->headersCount - 1)) {
                         sprintf(header, "%s\r\n", response->headers[i]);
                     } else {
@@ -122,7 +122,7 @@ void handle_connection(void *arg) {
                     }
                 }
             }
-            logMessage(DEBUG,"data: %s\n", response->data);
+            log_message(DEBUG,"data: %s\n", response->data);
             sprintf(data, "%s\r\n", response->data);
             send_string(sockfd, http);
             send_string(sockfd, header);
@@ -159,7 +159,7 @@ int get_file_size(int fd) {
 
 // Definition of function fatal().
 void fatal(char *a) {
-    logMessage(ERROR, "Error: %s\n", a);
+    log_message(ERROR, "Error: %s\n", a);
     exit(-1);
 }
 

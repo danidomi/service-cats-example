@@ -7,25 +7,25 @@ char *get_path() {
 Response *handle_api(Request *request) {
     switch (request->method) {
         case GET:
-            return handleGET(request);
+            return handle_get(request);
         case POST:
-            return handlePOST(request);
+            return handle_post(request);
         default:
             // default
-            return handleGET(request);
+            return handle_get(request);
     }
 }
 
-Response *handleGET(Request *request) {
+Response *handle_get(Request *request) {
     Cat *cat = NULL;
     if (request->queryParams == NULL) {
         return NULL;
     }
-    char *id = getQueryParamValue(request, "id");
+    char *id = get_query_param_value(request, "id");
     if (id == NULL) {
         return NULL;
     }
-    cat = GetCat(atoi(id));
+    cat = get_cat(atoi(id));
     Response *response = malloc(sizeof(Response));
     response->status_code = "200 OK";
     response->headers[0] = "Content-Type: application/json; charset=utf-8";
@@ -34,11 +34,11 @@ Response *handleGET(Request *request) {
     // Create a JsonConverter for the Cat struct
     JsonConverter catConverter = {
             .data = cat,
-            .toJson = toJson,
+            .to_json = to_json,
     };
 
     // Convert the Cat struct to JSON using the generic function
-    char *json = convertToJson(&catConverter);
+    char *json = convert_to_json(&catConverter);
     if (json == NULL) {
         return NULL;
     }
@@ -49,21 +49,21 @@ Response *handleGET(Request *request) {
     return response;
 }
 
-Response *handlePOST(Request *request) {
+Response *handle_post(Request *request) {
     Cat *cat = NULL;
     if (request->queryParams == NULL) {
         return NULL;
     }
-    char *age = getQueryParamValue(request, "age");
+    char *age = get_query_param_value(request, "age");
     if (age == NULL) {
         return NULL;
     }
     int ageInt = atoi(age);
-    char *name = getQueryParamValue(request, "name");
+    char *name = get_query_param_value(request, "name");
     if (name == NULL) {
         return NULL;
     }
-    cat = CreateCat(ageInt, name);
+    cat = create_cat(ageInt, name);
     Response *response = malloc(sizeof(Response));
     response->status_code = "200 OK";
     response->headers[0] = "Content-Type: application/json; charset=utf-8";
@@ -72,11 +72,11 @@ Response *handlePOST(Request *request) {
     // Create a JsonConverter for the Cat struct
     JsonConverter catConverter = {
             .data = cat,
-            .toJson = toJson,
+            .to_json = to_json,
     };
 
     // Convert the Cat struct to JSON using the generic function
-    char *json = convertToJson(&catConverter);
+    char *json = convert_to_json(&catConverter);
     if (json == NULL) {
         return NULL;
     }

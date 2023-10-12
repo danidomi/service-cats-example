@@ -9,5 +9,5 @@ typedef struct Cat {
     Error *error;
 } Cat;
 
-Cat * newErrorCat(Error * err);
-Cat * newErrorMsgCat(char * message);
+Cat * new_error_cat(Error * err);
+Cat * new_error_msg_cat(char * message);

@@ -1,4 +1,4 @@
 #include "../repository/Repository.h"
 
-Cat * CreateCat(int age, char * name);
-Cat * GetCat(int id);
+Cat * create_cat(int age, char * name);
+Cat * get_cat(int id);

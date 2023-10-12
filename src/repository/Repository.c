@@ -8,7 +8,7 @@ Error * configDatabase() {
         return NULL;
     }
 
-    struct DatabaseConfig *config = readPropertyFile("config/database.properties");
+    struct DatabaseConfig *config = read_property_file("config/database.properties");
     if (config == NULL) {
         return new("Error while reading the config file");
     }
@@ -17,36 +17,36 @@ Error * configDatabase() {
     if (conn == NULL) {
         char errorMessage[100];
         sprintf(errorMessage, "Error while connecting to mysql %u: %s\n", mysql_errno(conn), mysql_error(conn));
-        logMessage(ERROR, errorMessage);
+        log_message(ERROR, errorMessage);
         return new(errorMessage);
     }
-    logMessage(DEBUG, "After");
+    log_message(DEBUG, "After");
     if (mysql_real_connect(conn, config->host, config->username,
                            config->password, config->name, config->port, NULL, 0) == NULL) {
-        logMessage(ERROR,"Error in connection %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR,"Error in connection %u: %s\n", mysql_errno(conn), mysql_error(conn));
         return new("Error while connection");
     }
 
-    logMessage(DEBUG, "after ");
+    log_message(DEBUG, "after ");
 
     if (mysql_query(conn, "use cats")) {
-        logMessage(ERROR,"Error checking database %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR,"Error checking database %u: %s\n", mysql_errno(conn), mysql_error(conn));
         return new("Error checking database");
     }
 }
 
-Cat *FindCat(int id) {
-    logMessage(DEBUG, "about to fetch a cat");
+Cat *find_cat(int id) {
+    log_message(DEBUG, "about to fetch a cat");
     configDatabase();
     // Check if the connection is valid
     if (conn == NULL) {
-        logMessage(ERROR, "Database connection is not initialized");
+        log_message(ERROR, "Database connection is not initialized");
         return NULL;
     }
     MYSQL_RES *result = NULL;
     Cat *cat = NULL;
 
-    logMessage(ERROR, "before mysql_query");
+    log_message(ERROR, "before mysql_query");
 
     // Construct the SQL query to retrieve the cat with the specified id
     char query[100]; // Adjust the size according to your query
@@ -54,21 +54,21 @@ Cat *FindCat(int id) {
 
     // Execute the SQL query and store the result
     if (mysql_query(conn, query) != 0) {
-        logMessage(ERROR, "Query error: %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR, "Query error: %u: %s\n", mysql_errno(conn), mysql_error(conn));
         return NULL;
     }
 
-    logMessage(DEBUG, "after mysql_query");
+    log_message(DEBUG, "after mysql_query");
     result = mysql_store_result(conn);
 
     if (result == NULL) {
-        logMessage(ERROR, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
         return NULL;
     }
 
     // Check if a row was retrieved
     MYSQL_ROW row = mysql_fetch_row(result);
-    logMessage(DEBUG, "after mysql_fetch_row");
+    log_message(DEBUG, "after mysql_fetch_row");
 
     if (row != NULL) {
         // Allocate memory for the Cat object
@@ -98,7 +98,7 @@ Cat *FindCat(int id) {
 
         cat->age = atoi(row[2]);
     }
-    logMessage(DEBUG, "cat %d %d %s", cat->id, cat->age, cat->name);
+    log_message(DEBUG, "cat %d %d %s", cat->id, cat->age, cat->name);
 
     // Free the result set
     mysql_free_result(result);
@@ -107,16 +107,16 @@ Cat *FindCat(int id) {
 }
 
 
-Cat *PersistCat(int age, char *name) {
+Cat *persist_cat(int age, char *name) {
     Error * err = configDatabase();
     if (err != NULL){
-        logMessage(ERROR, "unable to get config database");
-        return newErrorCat(err);
+        log_message(ERROR, "unable to get config database");
+        return new_error_cat(err);
     }
     // Check if the connection is valid
     if (conn == NULL) {
-        logMessage(ERROR, "Database connection is not initialized");
-        return newErrorMsgCat("Database connection is not initialized");
+        log_message(ERROR, "Database connection is not initialized");
+        return new_error_msg_cat("Database connection is not initialized");
     }
 
     // Construct the SQL query to insert a new cat record
@@ -125,7 +125,7 @@ Cat *PersistCat(int age, char *name) {
 
     // Execute the SQL query
     if (mysql_query(conn, query)) {
-        logMessage(ERROR, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
         return NULL;
     }
 

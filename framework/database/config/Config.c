@@ -1,7 +1,7 @@
 #include "Config.h"
 
 // Function to read and parse the property file
-DatabaseConfig * readPropertyFile(const char *filename) {
+DatabaseConfig * read_property_file(const char *filename) {
     DatabaseConfig * config = malloc(sizeof(DatabaseConfig));
     FILE *file = fopen(filename, "r");
     if (file == NULL) {

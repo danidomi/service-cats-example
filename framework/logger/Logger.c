@@ -12,7 +12,7 @@ void getCurrentTime(char *timestamp, size_t size) {
 }
 
 // Function to log a message
-void logMessage(LogLevel level, const char *format, ...) {
+void log_message(LogLevel level, const char *format, ...) {
     va_list args;
     va_start(args, format);
 

@@ -24,5 +24,5 @@ typedef struct Request {
     size_t queryParamsCount;
 } Request;
 
-Request *parseRequest(char *req);
-char *getQueryParamValue(const Request *request, const char *key);
+Request *parse_request(char *req);
+char *get_query_param_value(const Request *request, const char *key);

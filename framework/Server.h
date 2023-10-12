@@ -29,7 +29,6 @@ struct ThreadArgs {
     struct sockaddr_in *client_addr_ptr;
 };
 
-
 void handle_connection(void *args);  //Handle web requests
 void fatal(char *a);
 

@@ -1,7 +1,7 @@
 #include "Converter.h"
 
 // Function to convert a Cat struct to JSON
-char *toJson(Cat *data) {
+char *to_json(Cat *data) {
     Cat *cat = (Cat *)data;
     if (cat == NULL) {
         return NULL;
@@ -19,10 +19,10 @@ char *toJson(Cat *data) {
 }
 
 // Function to convert any struct to JSON using a JsonConverter
-char *convertToJson(const JsonConverter *converter) {
-    if (converter == NULL || converter->toJson == NULL) {
+char *convert_to_json(const JsonConverter *converter) {
+    if (converter == NULL || converter->to_json == NULL) {
         return NULL;
     }
 
-    return converter->toJson(converter->data);
+    return converter->to_json(converter->data);
 }
