@@ -21,8 +21,8 @@ Error * configDatabase() {
         return new(errorMessage);
     }
     log_message(DEBUG, "After");
-    if (mysql_real_connect(conn, config->host, config->username,
-                           config->password, config->name, config->port, NULL, 0) == NULL) {
+    if (mysql_real_connect(conn, "127.0.0.1", config->username,
+                           config->password, config->name, 3307, NULL, 0) == NULL) {
         log_message(ERROR,"Error in connection %u: %s\n", mysql_errno(conn), mysql_error(conn));
         return new("Error while connection");
     }
@@ -75,7 +75,7 @@ Cat *find_cat(int id) {
         cat = (Cat *) malloc(sizeof(Cat));
 
         if (cat == NULL) {
-            perror("Memory allocation failed");
+            log_message(ERROR, "Memory allocation failed");
             mysql_free_result(result);
             return NULL;
         }
@@ -87,7 +87,7 @@ Cat *find_cat(int id) {
         if (row[1] != NULL) {
             cat->name = strdup(row[1]);
             if (cat->name == NULL) {
-                perror("Memory allocation failed");
+                log_message(ERROR, "Memory allocation failed");
                 free(cat);
                 mysql_free_result(result);
                 return NULL;
@@ -135,7 +135,7 @@ Cat *persist_cat(int age, char *name) {
     // Create a Cat object with the inserted data
     Cat *newCat = (Cat *) malloc(sizeof(Cat));
     if (newCat == NULL) {
-        perror("Memory allocation failed");
+        log_message(ERROR, "Memory allocation failed");
         return NULL;
     }
 

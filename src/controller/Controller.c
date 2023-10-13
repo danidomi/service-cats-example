@@ -1,7 +1,7 @@
 #include "Controller.h"
 
 char *get_path() {
-    return "/cat";
+    return "/cats";
 }
 
 Response *handle_api(Request *request) {
