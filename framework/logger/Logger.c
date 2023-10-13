@@ -51,7 +51,6 @@ void log_message(LogLevel level, const char *format, ...) {
 
     vfprintf(stderr, format, args);
     fprintf(stderr, "\n");
-
     // Ensure that the message is immediately printed to stderr
     fflush(stderr);
     va_end(args);

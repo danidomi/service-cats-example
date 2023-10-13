@@ -13,7 +13,7 @@ char *to_json(Cat *data) {
     }
 
     // Create the JSON string
-    sprintf(json, "{\"name\":\"%s\",\"age\":%d}", cat->name, cat->age);
+    sprintf(json, "%s", to_string(cat));
 
     return json;
 }
