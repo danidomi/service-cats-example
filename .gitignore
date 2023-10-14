@@ -1,3 +1,6 @@
 *.o
 Server
 logfile.log
+output
+deps
+bin

@@ -1,3 +1,4 @@
+#pragma once
 #include "../service/Service.h"
 #include <stdlib.h>
 #include <stdio.h>
