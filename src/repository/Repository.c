@@ -8,10 +8,10 @@ Error * configDatabase() {
         return NULL;
     }
 
-    struct DatabaseConfig *config = read_property_file("config/database.properties");
+    /*struct DatabaseConfig *config = read_property_file("config/database.properties");
     if (config == NULL) {
         return new("Error while reading the config file");
-    }
+    }*/
     conn = mysql_init(NULL);
 
     if (conn == NULL) {
@@ -21,8 +21,8 @@ Error * configDatabase() {
         return new(errorMessage);
     }
     log_message(DEBUG, "After");
-    if (mysql_real_connect(conn, "127.0.0.1", config->username,
-                           config->password, config->name, 3307, NULL, 0) == NULL) {
+    if (mysql_real_connect(conn, "127.0.0.1", "root",
+                           "root", "cats", 3307, NULL, 0) == NULL) {
         log_message(ERROR,"Error in connection %u: %s\n", mysql_errno(conn), mysql_error(conn));
         return new("Error while connection");
     }

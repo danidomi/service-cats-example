@@ -1,4 +1,5 @@
-#include "../../framework/Server.h"
+#pragma once
+#include <c-framework-service/Server.h>
 #include "../service/Service.h"
 #include <stdlib.h>
 #include <stdio.h>

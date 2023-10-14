@@ -1,7 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../framework/error/Error.h"
+#include <c-framework-service/error/Error.h>
 
 typedef struct Cat {
     int id;
