@@ -1,4 +1,4 @@
-#include "Service.h"
+#include "service.h"
 
 int valid_input(int age, char * name){
     return age <= 0 && strlen(name) == 0 ? -1 : 1;

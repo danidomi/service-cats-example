@@ -1,4 +1,4 @@
-#include "Controller.h"
+#include "controller.h"
 
 char *get_path() {
     return "/cats";

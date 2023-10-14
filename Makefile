@@ -1,29 +1,29 @@
-.PHONY: all clean Server Converter.o
+.PHONY: all clean service-cats-example converter.o
 
-all: Server
+all: service-cats-example
 
 CFLAGS += -Ideps
 
-Server: Cat.o Repository.o Converter.o Service.o Controller.o
-	gcc -o bin/Server output/Controller.o output/Converter.o output/Cat.o output/Repository.o output/Service.o deps/c-framework-service/c-framework-service.o -lmysqlclient $(CFLAGS)
+service-cats-example: cat.o repository.o converter.o service.o controller.o
+	gcc -o bin/service-cats-example output/controller.o output/converter.o output/cat.o output/repository.o output/service.o deps/c-framework-service/c-framework-service.o -lmysqlclient $(CFLAGS)
 
-Converter.o: src/utils/Converter.c
-	gcc -c src/utils/Converter.c -o output/Converter.o $(CFLAGS)
+converter.o: src/utils/converter.c
+	gcc -c src/utils/converter.c -o output/converter.o $(CFLAGS)
 
-Controller.o: src/controller/Controller.c
-	gcc -c -u get_path -u handle_api src/controller/Controller.c -o output/Controller.o $(CFLAGS)
+controller.o: src/controller/controller.c
+	gcc -c src/controller/controller.c -o output/controller.o $(CFLAGS)
 
-Service.o: src/service/Service.c
-	gcc -c src/service/Service.c -o output/Service.o $(CFLAGS)
+service.o: src/service/service.c
+	gcc -c src/service/service.c -o output/service.o $(CFLAGS)
 
-Cat.o: src/model/Cat.c
-	gcc -c src/model/Cat.c -o output/Cat.o $(CFLAGS)
+cat.o: src/model/cat.c
+	gcc -c src/model/cat.c -o output/cat.o $(CFLAGS)
 
-Repository.o: src/repository/Repository.c
-	gcc -c src/repository/Repository.c -o output/Repository.o $(CFLAGS)
+repository.o: src/repository/repository.c
+	gcc -c src/repository/repository.c -o output/repository.o $(CFLAGS)
 
 clean-deps:
 	rm -rf deps/*
 
 clean:
-	rm -rf output/*.o bin/Server
+	rm -rf output/*.o bin/service-cats-example

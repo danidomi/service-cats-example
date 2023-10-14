@@ -2,7 +2,7 @@ version: '3.2'
 services:
 
   db:
-    container_name: mvc_db
+    container_name: service-cats-example_db
     image: mysql:5.6.39
     restart: always
     env_file:

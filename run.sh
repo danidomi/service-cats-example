@@ -1,3 +1,3 @@
 #!/bin/bash
 
-make && ./bin/Server
+make && ./bin/service-cats-example
