@@ -1,14 +1,21 @@
-MVC
-===
+# service-cats-example
+
+## Table of Contents
+
+- [Introduction](#introduction)
+- [Installation](#installation)
+- [How to Run](#how-to-run)
+- [How to Test](#how-to-test)
 
 # Introduction
 
-This is an e.g. of a Microservice written in C, using the framework [c-framework-service](https://github.com/danidomi/c-framework-service) and the dependency manager [cdeps](https://github.com/danidomi/cdeps)
-
+This is an example of a microservice written in C, using the [c-framework-service](https://github.com/danidomi/c-framework-service) framework 
+and the dependency manager [cdeps](https://github.com/danidomi/cdeps).
 
 ## Installation
 
-If you don't have yet the tool please follow the guide from [cdeps](https://github.com/danidomi/cdeps) how to install it
+Before getting started, make sure you have [cdeps](https://github.com/danidomi/cdeps) installed. 
+You can follow the installation guide on their repository:
 
 ```shell
 cdeps install
@@ -16,13 +23,13 @@ cdeps install
 
 ## How to run
 
-first we need to have a running database, if you don't have one the easiest way would be with docker
+To run the microservice, you need a running database. If you don't have one, the easiest way to set it up is using Docker. You can bring up the database with the following command:
 
 ```shell
 docker-compose up -d db
 ```
 
-once the database is up, let's compile and run our `microservice`
+Once the database is up and running, you can compile and run the microservice:
 
 ```shell
 ./run.sh
@@ -30,9 +37,9 @@ once the database is up, let's compile and run our `microservice`
 
 ## How to test
 
+To test the microservice, you can use curl or any other HTTP client.
+For example, you can make a request to the microservice using the following curl command:
+
 ```shell
 curl http://localhost:8080/cats\?id\=1
 ```
-
-
-Author: Daniel Domingues

@@ -6,6 +6,6 @@ COPY . .
 RUN make
 
 FROM ubuntu
-COPY --from=build-env /app/bin/Server /app/bin/Server
+COPY --from=build-env /app/bin/service-cats-example /app/bin/service-cats-example
 WORKDIR /app
-CMD ["/app/bin/Server"]
+CMD ["/app/bin/service-cats-example"]

@@ -1,4 +1,4 @@
-#include "Cat.h"
+#include "cat.h"
 
 Cat * new_error_cat(Error * err) {
     Cat * cat = malloc(sizeof (Cat));

@@ -1,4 +1,4 @@
-#include "Repository.h"
+#include "repository.h"
 
 // Global database connection handle
 MYSQL *conn;
@@ -20,7 +20,7 @@ Error * configDatabase() {
         log_message(ERROR, errorMessage);
         return new(errorMessage);
     }
-    log_message(DEBUG, "After");
+
     if (mysql_real_connect(conn, "127.0.0.1", "root",
                            "root", "cats", 3307, NULL, 0) == NULL) {
         log_message(ERROR,"Error in connection %u: %s\n", mysql_errno(conn), mysql_error(conn));
