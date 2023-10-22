@@ -4,6 +4,11 @@ all: service-cats-example
 
 CFLAGS += -Ideps
 
+output_folder := output  # Define the output folder
+
+# Create the output folder if it doesn't exist
+$(shell mkdir -p $(output_folder))
+
 service-cats-example: cat.o repository.o converter.o service.o controller.o
 	gcc -o bin/service-cats-example output/controller.o output/converter.o output/cat.o output/repository.o output/service.o deps/c-framework-service/c-framework-service.o -lmysqlclient $(CFLAGS)
 
