@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <c-framework-service/server.h>
+#include <c-framework-service/server/server.h>
 
 #include "../service/service.h"
 #include "../utils/converter.h"
