@@ -9,5 +9,7 @@
 
 #include "../model/cat.h"
 
-Cat * find_cat(int id);
-Cat * persist_cat(int age, char* name);
+/* Return NULL when the cat is simply not found (no row).
+ * If err is non-NULL and a real error occurred (DB/network), *err is set. */
+Cat *find_cat(int id, Error **err);
+Cat *persist_cat(int age, char *name, Error **err);

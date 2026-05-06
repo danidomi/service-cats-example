@@ -1,28 +1,14 @@
 #include "converter.h"
 
-// Function to convert a Cat struct to JSON
+#include "../model/cat.h"
+
+/* Returns a malloc'd string. Caller frees. */
 char *to_json(Cat *data) {
-    Cat *cat = (Cat *)data;
-    if (cat == NULL) {
-        return NULL;
-    }
-
-    char *json = (char *)malloc(256); // Allocate memory for the JSON string
-    if (json == NULL) {
-        return NULL; // Memory allocation failed
-    }
-
-    // Create the JSON string
-    sprintf(json, "%s", to_string(cat));
-
-    return json;
+    if (!data) return NULL;
+    return to_string(data);
 }
 
-// Function to convert any struct to JSON using a JsonConverter
 char *convert_to_json(const JsonConverter *converter) {
-    if (converter == NULL || converter->to_json == NULL) {
-        return NULL;
-    }
-
+    if (!converter || !converter->to_json) return NULL;
     return converter->to_json(converter->data);
 }

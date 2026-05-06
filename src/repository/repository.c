@@ -1,147 +1,109 @@
 #include "repository.h"
 
-// Global database connection handle
-MYSQL *conn;
+#include <string.h>
 
-Error * configDatabase() {
-    if (conn != NULL) {
-        return NULL;
-    }
+static MYSQL *conn = NULL;
 
-    /*struct DatabaseConfig *config = read_property_file("config/database.properties");
-    if (config == NULL) {
-        return new("Error while reading the config file");
-    }*/
-    conn = mysql_init(NULL);
-
-    if (conn == NULL) {
-        char errorMessage[100];
-        sprintf(errorMessage, "Error while connecting to mysql %u: %s\n", mysql_errno(conn), mysql_error(conn));
-        log_message(ERROR, errorMessage);
-        return new(errorMessage);
-    }
-
-    if (mysql_real_connect(conn, "127.0.0.1", "root",
-                           "root", "cats", 3307, NULL, 0) == NULL) {
-        log_message(ERROR,"Error in connection %u: %s\n", mysql_errno(conn), mysql_error(conn));
-        return new("Error while connection");
-    }
-
-    log_message(DEBUG, "after ");
-
-    if (mysql_query(conn, "use cats")) {
-        log_message(ERROR,"Error checking database %u: %s\n", mysql_errno(conn), mysql_error(conn));
-        return new("Error checking database");
+static void set_err(Error **err, const char *msg) {
+    if (err && !*err) {
+        *err = error_new(msg);
     }
 }
 
-Cat *find_cat(int id) {
-    log_message(DEBUG, "about to fetch a cat");
-    configDatabase();
-    // Check if the connection is valid
+static Error *configDatabase(void) {
+    if (conn != NULL) return NULL;
+
+    conn = mysql_init(NULL);
     if (conn == NULL) {
-        log_message(ERROR, "Database connection is not initialized");
+        return error_new("mysql_init failed");
+    }
+
+    if (mysql_real_connect(conn, "127.0.0.1", "root", "root", "cats", 3307, NULL, 0) == NULL) {
+        char buf[256];
+        snprintf(buf, sizeof(buf), "mysql_real_connect: %s", mysql_error(conn));
+        log_message(ERROR, "%s", buf);
+        Error *e = error_new(buf);
+        mysql_close(conn);
+        conn = NULL;
+        return e;
+    }
+
+    if (mysql_query(conn, "use cats")) {
+        char buf[256];
+        snprintf(buf, sizeof(buf), "use cats: %s", mysql_error(conn));
+        log_message(ERROR, "%s", buf);
+        return error_new(buf);
+    }
+    return NULL;
+}
+
+Cat *find_cat(int id, Error **err) {
+    Error *cfg_err = configDatabase();
+    if (cfg_err) {
+        if (err) *err = cfg_err; else error_free(cfg_err);
         return NULL;
     }
-    MYSQL_RES *result = NULL;
-    Cat *cat = NULL;
 
-    log_message(ERROR, "before mysql_query");
-
-    // Construct the SQL query to retrieve the cat with the specified id
-    char query[100]; // Adjust the size according to your query
+    char query[128];
     snprintf(query, sizeof(query), "SELECT id, name, age FROM cats WHERE id = %d", id);
 
-    // Execute the SQL query and store the result
     if (mysql_query(conn, query) != 0) {
-        log_message(ERROR, "Query error: %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR, "query: %s", mysql_error(conn));
+        set_err(err, mysql_error(conn));
         return NULL;
     }
 
-    log_message(DEBUG, "after mysql_query");
-    result = mysql_store_result(conn);
-
+    MYSQL_RES *result = mysql_store_result(conn);
     if (result == NULL) {
-        log_message(ERROR, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR, "store_result: %s", mysql_error(conn));
+        set_err(err, mysql_error(conn));
         return NULL;
     }
 
-    // Check if a row was retrieved
+    Cat *cat = NULL;
     MYSQL_ROW row = mysql_fetch_row(result);
-    log_message(DEBUG, "after mysql_fetch_row");
-
     if (row != NULL) {
-        // Allocate memory for the Cat object
-        cat = (Cat *) malloc(sizeof(Cat));
-
-        if (cat == NULL) {
-            log_message(ERROR, "Memory allocation failed");
-            mysql_free_result(result);
-            return NULL;
+        cat = malloc(sizeof(Cat));
+        if (!cat) {
+            set_err(err, "out of memory");
+            goto cleanup;
         }
-
-        // Parse the values from the result row
         cat->id = atoi(row[0]);
-
-        // Check if row[1] (name) is NULL before using strdup
-        if (row[1] != NULL) {
-            cat->name = strdup(row[1]);
-            if (cat->name == NULL) {
-                log_message(ERROR, "Memory allocation failed");
-                free(cat);
-                mysql_free_result(result);
-                return NULL;
-            }
-        } else {
-            cat->name = NULL; // Handle case where name is NULL in the database
-        }
-
-        cat->age = atoi(row[2]);
+        cat->name = row[1] ? strdup(row[1]) : NULL;
+        cat->age = row[2] ? atoi(row[2]) : 0;
+        cat->error = NULL;
     }
-    log_message(DEBUG, "cat %d %d %s", cat->id, cat->age, cat->name);
+    /* row == NULL is "not found", not an error: cat stays NULL, err stays unset */
 
-    // Free the result set
+cleanup:
     mysql_free_result(result);
-
     return cat;
 }
 
-
-Cat *persist_cat(int age, char *name) {
-    Error * err = configDatabase();
-    if (err != NULL){
-        log_message(ERROR, "unable to get config database");
-        return new_error_cat(err);
-    }
-    // Check if the connection is valid
-    if (conn == NULL) {
-        log_message(ERROR, "Database connection is not initialized");
-        return new_error_msg_cat("Database connection is not initialized");
+Cat *persist_cat(int age, char *name, Error **err) {
+    Error *cfg_err = configDatabase();
+    if (cfg_err) {
+        if (err) *err = cfg_err; else error_free(cfg_err);
+        return NULL;
     }
 
-    // Construct the SQL query to insert a new cat record
-    char query[100]; // Adjust the size according to your query
+    char query[256];
     snprintf(query, sizeof(query), "INSERT INTO cats (name, age) VALUES ('%s', %d)", name, age);
 
-    // Execute the SQL query
     if (mysql_query(conn, query)) {
-        log_message(ERROR, "Error %u: %s\n", mysql_errno(conn), mysql_error(conn));
+        log_message(ERROR, "insert: %s", mysql_error(conn));
+        set_err(err, mysql_error(conn));
         return NULL;
     }
 
-    // Retrieve the ID of the newly inserted cat
-    int newCatId = mysql_insert_id(conn);
-
-    // Create a Cat object with the inserted data
-    Cat *newCat = (Cat *) malloc(sizeof(Cat));
-    if (newCat == NULL) {
-        log_message(ERROR, "Memory allocation failed");
+    Cat *cat = malloc(sizeof(Cat));
+    if (!cat) {
+        set_err(err, "out of memory");
         return NULL;
     }
-
-    newCat->id = newCatId;
-    newCat->name = strdup(name);
-    newCat->age = age;
-
-    return newCat;
+    cat->id = (int)mysql_insert_id(conn);
+    cat->name = strdup(name);
+    cat->age = age;
+    cat->error = NULL;
+    return cat;
 }

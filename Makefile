@@ -1,34 +1,49 @@
-.PHONY: all clean service-cats-example converter.o
+.PHONY: all clean clean-deps service-cats-example
+
+CC ?= gcc
+CFLAGS += -Ideps
+
+OUTPUT_DIR := output
+BIN_DIR := bin
+FRAMEWORK_OBJ := deps/c-framework-service/c-framework-service.o
+LDLIBS := -lmysqlclient -lpthread
+
+OBJS := \
+    $(OUTPUT_DIR)/cat.o \
+    $(OUTPUT_DIR)/repository.o \
+    $(OUTPUT_DIR)/converter.o \
+    $(OUTPUT_DIR)/service.o \
+    $(OUTPUT_DIR)/controller.o \
+    $(OUTPUT_DIR)/main.o
 
 all: service-cats-example
 
-CFLAGS += -Ideps
+$(OUTPUT_DIR) $(BIN_DIR):
+	mkdir -p $@
 
-output_folder := output  # Define the output folder
+service-cats-example: $(OUTPUT_DIR) $(BIN_DIR) $(OBJS) $(FRAMEWORK_OBJ)
+	$(CC) -o $(BIN_DIR)/service-cats-example $(OBJS) $(FRAMEWORK_OBJ) $(LDLIBS) $(CFLAGS)
 
-# Create the output folder if it doesn't exist
-$(shell mkdir -p $(output_folder))
+$(OUTPUT_DIR)/main.o: main.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-service-cats-example: cat.o repository.o converter.o service.o controller.o
-	gcc -o bin/service-cats-example output/controller.o output/converter.o output/cat.o output/repository.o output/service.o deps/c-framework-service/c-framework-service.o -lmysqlclient $(CFLAGS)
+$(OUTPUT_DIR)/converter.o: src/utils/converter.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-converter.o: src/utils/converter.c
-	gcc -c src/utils/converter.c -o output/converter.o $(CFLAGS)
+$(OUTPUT_DIR)/controller.o: src/controller/controller.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-controller.o: src/controller/controller.c
-	gcc -c src/controller/controller.c -o output/controller.o $(CFLAGS)
+$(OUTPUT_DIR)/service.o: src/service/service.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-service.o: src/service/service.c
-	gcc -c src/service/service.c -o output/service.o $(CFLAGS)
+$(OUTPUT_DIR)/cat.o: src/model/cat.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
-cat.o: src/model/cat.c
-	gcc -c src/model/cat.c -o output/cat.o $(CFLAGS)
-
-repository.o: src/repository/repository.c
-	gcc -c src/repository/repository.c -o output/repository.o $(CFLAGS)
+$(OUTPUT_DIR)/repository.o: src/repository/repository.c
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean-deps:
 	rm -rf deps/*
 
 clean:
-	rm -rf output/*.o bin/service-cats-example
+	rm -rf $(OUTPUT_DIR) $(BIN_DIR)
