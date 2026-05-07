@@ -1,39 +1,38 @@
-FROM ubuntu:22.04 AS build
+FROM alpine:3.20 AS build
 
-ARG TARGETARCH
-ARG FRAMEWORK_VERSION=v0.2.0
+RUN apk add --no-cache \
+        ca-certificates curl unzip make gcc musl-dev mariadb-connector-c-dev
 
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates curl unzip make gcc default-libmysqlclient-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Install cdeps from source. (The upstream install.sh on HEAD is currently
+# broken — `rm && curl` short-circuits when the .zip doesn't yet exist.)
+RUN set -eux; \
+    curl -fsSL -o /tmp/cdeps.zip \
+        "https://github.com/danidomi/cdeps/archive/refs/heads/main.zip"; \
+    unzip -q /tmp/cdeps.zip -d /tmp; \
+    cd /tmp/cdeps-main; \
+    gcc -o /usr/local/bin/cdeps main.c $(find src -type f -name "*.c") -w; \
+    rm -rf /tmp/cdeps.zip /tmp/cdeps-main
 
 WORKDIR /app
 COPY . .
 
-# Download the framework release artifact for this container's architecture.
+# Fetch framework dependencies declared in c.deps.
+# cdeps unpacks releases under deps/<repo>/Linux_<arch>/; flatten that
+# subdir so the include path <c-framework-service/...> resolves under -Ideps.
 RUN set -eux; \
-    case "$TARGETARCH" in \
-        amd64) FW_ZIP="Linux_x86_64.zip" ;; \
-        arm64) FW_ZIP="Linux_aarch64.zip" ;; \
-        arm)   FW_ZIP="Linux_armv7l.zip" ;; \
-        *) echo "unsupported TARGETARCH: $TARGETARCH" >&2; exit 1 ;; \
-    esac; \
-    rm -rf deps; mkdir -p deps; \
-    curl -fsSL -o /tmp/fw.zip \
-      "https://github.com/danidomi/c-framework-service/releases/download/${FRAMEWORK_VERSION}/${FW_ZIP}"; \
-    unzip -q /tmp/fw.zip -d deps; \
-    mv deps/Linux_* deps/c-framework-service; \
-    rm -f /tmp/fw.zip
+    rm -rf deps; \
+    cdeps install; \
+    for d in deps/*/Linux_* deps/*/Darwin_*; do \
+        [ -d "$d" ] || continue; \
+        mv "$d"/* "$(dirname "$d")/"; \
+        rmdir "$d"; \
+    done
 
 RUN make clean all
 
-FROM ubuntu:22.04
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        ca-certificates libmysqlclient21 \
-    && rm -rf /var/lib/apt/lists/*
-
+FROM alpine:3.20
+RUN apk add --no-cache \
+        ca-certificates mariadb-connector-c
 COPY --from=build /app/bin/service-cats-example /app/bin/service-cats-example
 
 EXPOSE 8080
