@@ -3,11 +3,14 @@
 #include <mysql/mysql.h>
 #include <stdio.h>
 
-#include <c-framework-service/database/config/config.h>
 #include <c-framework-service/error/error.h>
 #include <c-framework-service/logger/logger.h>
 
+#include "../config/config.h"
 #include "../model/cat.h"
+
+void repository_init(const DbConfig *cfg);
+void repository_close(void);
 
 /* Return NULL when the cat is simply not found (no row).
  * If err is non-NULL and a real error occurred (DB/network), *err is set. */

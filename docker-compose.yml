@@ -1,19 +1,42 @@
-version: '3.2'
 services:
-
   db:
     container_name: service-cats-example_db
-    image: mysql:5.6.39
-    restart: always
-    env_file:
-      - .env
-    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --default-authentication-plugin=mysql_native_password --local-infile --innodb-large-prefix=1 --innodb-file-format=barracuda --innodb-file-format_max=barracuda --innodb-file-per-table=1
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cats
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --default-authentication-plugin=mysql_native_password
     ports:
-      - '3307:3307'
-    expose:
-      - '3307'
+      - '3307:3306'
     volumes:
-      - db:/var/lib/db
+      - db:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  cats:
+    container_name: service-cats-example
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: '3306'
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: cats
+      PORT: '8080'
+    ports:
+      - '8080:8080'
 
 volumes:
   db:

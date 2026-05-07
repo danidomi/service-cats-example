@@ -1,8 +1,28 @@
 #include "repository.h"
 
+#include <stdlib.h>
 #include <string.h>
 
 static MYSQL *conn = NULL;
+static DbConfig cfg = {0};
+
+void repository_init(const DbConfig *src) {
+    if (!src) return;
+    db_config_free(&cfg);
+    cfg.host     = src->host     ? strdup(src->host)     : NULL;
+    cfg.user     = src->user     ? strdup(src->user)     : NULL;
+    cfg.password = src->password ? strdup(src->password) : NULL;
+    cfg.database = src->database ? strdup(src->database) : NULL;
+    cfg.port     = src->port;
+}
+
+void repository_close(void) {
+    if (conn) {
+        mysql_close(conn);
+        conn = NULL;
+    }
+    db_config_free(&cfg);
+}
 
 static void set_err(Error **err, const char *msg) {
     if (err && !*err) {
@@ -13,12 +33,18 @@ static void set_err(Error **err, const char *msg) {
 static Error *configDatabase(void) {
     if (conn != NULL) return NULL;
 
+    if (!cfg.host) {
+        return error_new("repository_init has not been called");
+    }
+
     conn = mysql_init(NULL);
     if (conn == NULL) {
         return error_new("mysql_init failed");
     }
 
-    if (mysql_real_connect(conn, "127.0.0.1", "root", "root", "cats", 3307, NULL, 0) == NULL) {
+    if (mysql_real_connect(conn,
+                           cfg.host, cfg.user, cfg.password, cfg.database,
+                           cfg.port, NULL, 0) == NULL) {
         char buf[256];
         snprintf(buf, sizeof(buf), "mysql_real_connect: %s", mysql_error(conn));
         log_message(ERROR, "%s", buf);
@@ -28,12 +54,8 @@ static Error *configDatabase(void) {
         return e;
     }
 
-    if (mysql_query(conn, "use cats")) {
-        char buf[256];
-        snprintf(buf, sizeof(buf), "use cats: %s", mysql_error(conn));
-        log_message(ERROR, "%s", buf);
-        return error_new(buf);
-    }
+    log_message(INFO, "connected to mysql at %s:%d/%s as %s",
+                cfg.host, cfg.port, cfg.database, cfg.user);
     return NULL;
 }
 

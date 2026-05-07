@@ -9,6 +9,7 @@ FRAMEWORK_OBJ := deps/c-framework-service/c-framework-service.o
 LDLIBS := -lmysqlclient -lpthread
 
 OBJS := \
+    $(OUTPUT_DIR)/config.o \
     $(OUTPUT_DIR)/cat.o \
     $(OUTPUT_DIR)/repository.o \
     $(OUTPUT_DIR)/converter.o \
@@ -25,6 +26,9 @@ service-cats-example: $(OUTPUT_DIR) $(BIN_DIR) $(OBJS) $(FRAMEWORK_OBJ)
 	$(CC) -o $(BIN_DIR)/service-cats-example $(OBJS) $(FRAMEWORK_OBJ) $(LDLIBS) $(CFLAGS)
 
 $(OUTPUT_DIR)/main.o: main.c
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(OUTPUT_DIR)/config.o: src/config/config.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OUTPUT_DIR)/converter.o: src/utils/converter.c
