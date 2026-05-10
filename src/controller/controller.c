@@ -77,3 +77,93 @@ Response *handle_post_cat(Request *request) {
 
     return cat_response("201 Created", cat);
 }
+
+Response *handle_list_cats(Request *request) {
+    (void)request;
+
+    Error *err = NULL;
+    size_t count = 0;
+    Cat **cats = list_all_cats(&count, &err);
+
+    if (err) {
+        Response *r = error_response("500 Internal Server Error", err->message);
+        error_free(err);
+        return r;
+    }
+
+    Response *r = response_new("200 OK");
+    if (!r) {
+        cats_free(cats, count);
+        return NULL;
+    }
+    response_add_header(r, "Content-Type: application/json; charset=utf-8");
+
+    /* Build {"data":[item, item, ...]} by concatenating each cat's JSON. */
+    size_t cap = 32;
+    for (size_t i = 0; i < count; i++) {
+        cap += (cats[i]->name ? strlen(cats[i]->name) : 0) + 64;
+    }
+    char *body = malloc(cap);
+    if (!body) {
+        cats_free(cats, count);
+        response_free(r);
+        return NULL;
+    }
+    size_t pos = 0;
+    pos += snprintf(body + pos, cap - pos, "{\"data\":[");
+    for (size_t i = 0; i < count; i++) {
+        char *one = to_string(cats[i]);
+        if (!one) continue;
+        pos += snprintf(body + pos, cap - pos, "%s%s", i == 0 ? "" : ",", one);
+        free(one);
+    }
+    pos += snprintf(body + pos, cap - pos, "]}");
+
+    response_set_body(r, body);
+    free(body);
+    cats_free(cats, count);
+    return r;
+}
+
+Response *handle_put_cat(Request *request) {
+    const char *id = get_query_param_value(request, "id");
+    const char *age = get_query_param_value(request, "age");
+    const char *name = get_query_param_value(request, "name");
+    if (!id) return error_response("400 Bad Request", "missing 'id'");
+    if (!age || !name) return error_response("400 Bad Request", "missing 'age' or 'name'");
+
+    Error *err = NULL;
+    Cat *cat = modify_cat(atoi(id), atoi(age), (char *)name, &err);
+
+    if (err) {
+        Response *r = error_response("400 Bad Request", err->message);
+        error_free(err);
+        return r;
+    }
+    if (!cat) {
+        return error_response("404 Not Found", "cat not found");
+    }
+    return cat_response("200 OK", cat);
+}
+
+Response *handle_delete_cat(Request *request) {
+    const char *id = get_query_param_value(request, "id");
+    if (!id) return error_response("400 Bad Request", "missing 'id'");
+
+    Error *err = NULL;
+    int rc = remove_cat(atoi(id), &err);
+
+    if (rc < 0) {
+        Response *r = error_response("500 Internal Server Error",
+                                     err ? err->message : "delete failed");
+        if (err) error_free(err);
+        return r;
+    }
+    if (rc == 0) {
+        return error_response("404 Not Found", "cat not found");
+    }
+
+    Response *r = response_new("204 No Content");
+    if (!r) return NULL;
+    return r;
+}

@@ -4,3 +4,5 @@ logfile.log
 output
 deps
 bin
+.idea/
+.claude/

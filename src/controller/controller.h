@@ -12,3 +12,6 @@
 
 Response *handle_get_cat(Request *request);
 Response *handle_post_cat(Request *request);
+Response *handle_list_cats(Request *request);
+Response *handle_put_cat(Request *request);
+Response *handle_delete_cat(Request *request);

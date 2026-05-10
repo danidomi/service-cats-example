@@ -6,7 +6,21 @@ CFLAGS += -Ideps
 OUTPUT_DIR := output
 BIN_DIR := bin
 FRAMEWORK_OBJ := deps/c-framework-service/c-framework-service.o
-LDLIBS := -lmysqlclient -lpthread
+
+# Repository backend: memory (default, no external DB), mysql, or postgres.
+# To add postgres: drop src/repository/repository_postgres.c implementing
+# repository.h and add an `else ifeq ($(DB),postgres)` branch below.
+DB ?= memory
+
+ifeq ($(DB),mysql)
+    REPO_SRC := src/repository/repository_mysql.c
+    LDLIBS   := -lmysqlclient -lpthread
+else ifeq ($(DB),memory)
+    REPO_SRC := src/repository/repository_memory.c
+    LDLIBS   := -lpthread
+else
+    $(error Unknown DB backend "$(DB)" — use memory or mysql)
+endif
 
 OBJS := \
     $(OUTPUT_DIR)/config.o \
@@ -43,7 +57,7 @@ $(OUTPUT_DIR)/service.o: src/service/service.c
 $(OUTPUT_DIR)/cat.o: src/model/cat.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-$(OUTPUT_DIR)/repository.o: src/repository/repository.c
+$(OUTPUT_DIR)/repository.o: $(REPO_SRC)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean-deps:

@@ -14,8 +14,11 @@ int main(void) {
     repository_init(&cfg);
     db_config_free(&cfg);
 
-    route_register(GET,  "/cats", handle_get_cat);
-    route_register(POST, "/cats", handle_post_cat);
+    route_register(GET,    "/cats",     handle_list_cats);
+    route_register(POST,   "/cats",     handle_post_cat);
+    route_register(GET,    "/cats/:id", handle_get_cat);
+    route_register(PUT,    "/cats/:id", handle_put_cat);
+    route_register(DELETE, "/cats/:id", handle_delete_cat);
 
     int rc = server_run(port_from_env(PORT));
     repository_close();

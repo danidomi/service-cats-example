@@ -1,7 +1,10 @@
-FROM alpine:3.20 AS build
+ARG DB=memory
 
-RUN apk add --no-cache \
-        ca-certificates curl unzip make gcc musl-dev mariadb-connector-c-dev
+FROM alpine:3.20 AS build
+ARG DB
+
+RUN apk add --no-cache ca-certificates curl unzip make gcc musl-dev \
+ && if [ "$DB" = "mysql" ]; then apk add --no-cache mariadb-connector-c-dev; fi
 
 # Install cdeps from source. (The upstream install.sh on HEAD is currently
 # broken — `rm && curl` short-circuits when the .zip doesn't yet exist.)
@@ -28,11 +31,12 @@ RUN set -eux; \
         rmdir "$d"; \
     done
 
-RUN make clean all
+RUN make DB=$DB clean all
 
 FROM alpine:3.20
-RUN apk add --no-cache \
-        ca-certificates mariadb-connector-c
+ARG DB
+RUN apk add --no-cache ca-certificates \
+ && if [ "$DB" = "mysql" ]; then apk add --no-cache mariadb-connector-c; fi
 COPY --from=build /app/bin/service-cats-example /app/bin/service-cats-example
 
 EXPOSE 8080

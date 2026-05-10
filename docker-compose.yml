@@ -23,7 +23,10 @@ services:
 
   cats:
     container_name: service-cats-example
-    build: .
+    build:
+      context: .
+      args:
+        DB: mysql
     restart: unless-stopped
     depends_on:
       db:

@@ -22,7 +22,7 @@ char *to_string(Cat *cat) {
     size_t need = (cat->name ? strlen(cat->name) : 0) + 64;
     char *buf = malloc(need);
     if (!buf) return NULL;
-    snprintf(buf, need, "{\"name\":\"%s\",\"age\":%d}",
-             cat->name ? cat->name : "", cat->age);
+    snprintf(buf, need, "{\"id\":%d,\"name\":\"%s\",\"age\":%d}",
+             cat->id, cat->name ? cat->name : "", cat->age);
     return buf;
 }
