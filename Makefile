@@ -27,6 +27,7 @@ OBJS := \
     $(OUTPUT_DIR)/cat.o \
     $(OUTPUT_DIR)/repository.o \
     $(OUTPUT_DIR)/converter.o \
+    $(OUTPUT_DIR)/json_input.o \
     $(OUTPUT_DIR)/service.o \
     $(OUTPUT_DIR)/controller.o \
     $(OUTPUT_DIR)/openapi.o \
@@ -47,6 +48,9 @@ $(OUTPUT_DIR)/config.o: src/config/config.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OUTPUT_DIR)/converter.o: src/utils/converter.c
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(OUTPUT_DIR)/json_input.o: src/utils/json_input.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OUTPUT_DIR)/controller.o: src/controller/controller.c

@@ -2,6 +2,8 @@
 
 #include <c-framework-service/error/error.h>
 
+#include "../utils/json_input.h"
+
 static Response *error_response(const char *status, const char *message) {
     Response *r = response_new(status);
     if (!r) return NULL;
@@ -58,12 +60,17 @@ Response *handle_get_cat(Request *request) {
 }
 
 Response *handle_post_cat(Request *request) {
-    const char *age = get_query_param_value(request, "age");
-    const char *name = get_query_param_value(request, "name");
-    if (!age || !name) return error_response("400 Bad Request", "missing 'age' or 'name'");
+    char *name = json_extract_string(request->body, "name");
+    int age = 0;
+    int has_age = json_extract_int(request->body, "age", &age);
+    if (!name || !has_age) {
+        free(name);
+        return error_response("400 Bad Request", "body must be JSON {\\\"name\\\":<string>,\\\"age\\\":<int>}");
+    }
 
     Error *err = NULL;
-    Cat *cat = create_cat(atoi(age), (char *)name, &err);
+    Cat *cat = create_cat(age, name, &err);
+    free(name);
 
     if (err) {
         const char *status = cat ? "500 Internal Server Error" : "400 Bad Request";
@@ -127,13 +134,19 @@ Response *handle_list_cats(Request *request) {
 
 Response *handle_put_cat(Request *request) {
     const char *id = get_query_param_value(request, "id");
-    const char *age = get_query_param_value(request, "age");
-    const char *name = get_query_param_value(request, "name");
     if (!id) return error_response("400 Bad Request", "missing 'id'");
-    if (!age || !name) return error_response("400 Bad Request", "missing 'age' or 'name'");
+
+    char *name = json_extract_string(request->body, "name");
+    int age = 0;
+    int has_age = json_extract_int(request->body, "age", &age);
+    if (!name || !has_age) {
+        free(name);
+        return error_response("400 Bad Request", "body must be JSON {\\\"name\\\":<string>,\\\"age\\\":<int>}");
+    }
 
     Error *err = NULL;
-    Cat *cat = modify_cat(atoi(id), atoi(age), (char *)name, &err);
+    Cat *cat = modify_cat(atoi(id), age, name, &err);
+    free(name);
 
     if (err) {
         Response *r = error_response("400 Bad Request", err->message);
