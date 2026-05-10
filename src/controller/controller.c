@@ -42,21 +42,21 @@ static Response *cat_response(const char *status, Cat *cat) {
 
 Response *handle_get_cat(Request *request) {
     const char *id = get_query_param_value(request, "id");
-    if (!id) return error_response("400 Bad Request", "missing 'id' query param");
+    if (!id) return error_response(HTTP_BAD_REQUEST, "missing 'id' query param");
 
     Error *err = NULL;
     Cat *cat = get_cat(atoi(id), &err);
 
     if (err) {
-        Response *r = error_response("500 Internal Server Error", err->message);
+        Response *r = error_response(HTTP_INTERNAL_SERVER_ERROR, err->message);
         error_free(err);
         return r;
     }
     if (!cat) {
-        return error_response("404 Not Found", "cat not found");
+        return error_response(HTTP_NOT_FOUND, "cat not found");
     }
 
-    return cat_response("200 OK", cat);
+    return cat_response(HTTP_OK, cat);
 }
 
 Response *handle_post_cat(Request *request) {
@@ -65,7 +65,7 @@ Response *handle_post_cat(Request *request) {
     int has_age = json_extract_int(request->body, "age", &age);
     if (!name || !has_age) {
         free(name);
-        return error_response("400 Bad Request", "body must be JSON {\\\"name\\\":<string>,\\\"age\\\":<int>}");
+        return error_response(HTTP_BAD_REQUEST, "body must be JSON {\\\"name\\\":<string>,\\\"age\\\":<int>}");
     }
 
     Error *err = NULL;
@@ -73,16 +73,16 @@ Response *handle_post_cat(Request *request) {
     free(name);
 
     if (err) {
-        const char *status = cat ? "500 Internal Server Error" : "400 Bad Request";
+        const char *status = cat ? HTTP_INTERNAL_SERVER_ERROR : HTTP_BAD_REQUEST;
         Response *r = error_response(status, err->message);
         error_free(err);
         return r;
     }
     if (!cat) {
-        return error_response("400 Bad Request", "invalid input");
+        return error_response(HTTP_BAD_REQUEST, "invalid input");
     }
 
-    return cat_response("201 Created", cat);
+    return cat_response(HTTP_CREATED, cat);
 }
 
 Response *handle_list_cats(Request *request) {
@@ -93,12 +93,12 @@ Response *handle_list_cats(Request *request) {
     Cat **cats = list_all_cats(&count, &err);
 
     if (err) {
-        Response *r = error_response("500 Internal Server Error", err->message);
+        Response *r = error_response(HTTP_INTERNAL_SERVER_ERROR, err->message);
         error_free(err);
         return r;
     }
 
-    Response *r = response_new("200 OK");
+    Response *r = response_new(HTTP_OK);
     if (!r) {
         cats_free(cats, count);
         return NULL;
@@ -134,14 +134,14 @@ Response *handle_list_cats(Request *request) {
 
 Response *handle_put_cat(Request *request) {
     const char *id = get_query_param_value(request, "id");
-    if (!id) return error_response("400 Bad Request", "missing 'id'");
+    if (!id) return error_response(HTTP_BAD_REQUEST, "missing 'id'");
 
     char *name = json_extract_string(request->body, "name");
     int age = 0;
     int has_age = json_extract_int(request->body, "age", &age);
     if (!name || !has_age) {
         free(name);
-        return error_response("400 Bad Request", "body must be JSON {\\\"name\\\":<string>,\\\"age\\\":<int>}");
+        return error_response(HTTP_BAD_REQUEST, "body must be JSON {\\\"name\\\":<string>,\\\"age\\\":<int>}");
     }
 
     Error *err = NULL;
@@ -149,34 +149,34 @@ Response *handle_put_cat(Request *request) {
     free(name);
 
     if (err) {
-        Response *r = error_response("400 Bad Request", err->message);
+        Response *r = error_response(HTTP_BAD_REQUEST, err->message);
         error_free(err);
         return r;
     }
     if (!cat) {
-        return error_response("404 Not Found", "cat not found");
+        return error_response(HTTP_NOT_FOUND, "cat not found");
     }
-    return cat_response("200 OK", cat);
+    return cat_response(HTTP_OK, cat);
 }
 
 Response *handle_delete_cat(Request *request) {
     const char *id = get_query_param_value(request, "id");
-    if (!id) return error_response("400 Bad Request", "missing 'id'");
+    if (!id) return error_response(HTTP_BAD_REQUEST, "missing 'id'");
 
     Error *err = NULL;
     int rc = remove_cat(atoi(id), &err);
 
     if (rc < 0) {
-        Response *r = error_response("500 Internal Server Error",
+        Response *r = error_response(HTTP_INTERNAL_SERVER_ERROR,
                                      err ? err->message : "delete failed");
         if (err) error_free(err);
         return r;
     }
     if (rc == 0) {
-        return error_response("404 Not Found", "cat not found");
+        return error_response(HTTP_NOT_FOUND, "cat not found");
     }
 
-    Response *r = response_new("204 No Content");
+    Response *r = response_new(HTTP_NO_CONTENT);
     if (!r) return NULL;
     return r;
 }

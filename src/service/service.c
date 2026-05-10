@@ -2,12 +2,16 @@
 
 #include <string.h>
 
+#include "../metrics/app_metrics.h"
+
 Cat *create_cat(int age, char *name, Error **err) {
     if (age <= 0 || !name || strlen(name) == 0) {
         if (err) *err = error_new("invalid input: age must be > 0 and name non-empty");
         return NULL;
     }
-    return persist_cat(age, name, err);
+    Cat *c = persist_cat(age, name, err);
+    if (c) app_metrics_cat_created();
+    return c;
 }
 
 Cat *get_cat(int id, Error **err) {
@@ -39,5 +43,7 @@ int remove_cat(int id, Error **err) {
         if (err) *err = error_new("invalid id");
         return -1;
     }
-    return delete_cat(id, err);
+    int rc = delete_cat(id, err);
+    if (rc == 1) app_metrics_cat_deleted();
+    return rc;
 }

@@ -128,7 +128,7 @@ static const char *OPENAPI_SPEC =
 
 Response *handle_swagger_ui(Request *request) {
     (void)request;
-    Response *r = response_new("200 OK");
+    Response *r = response_new(HTTP_OK);
     if (!r) return NULL;
     response_add_header(r, "Content-Type: text/html; charset=utf-8");
     response_set_body(r, SWAGGER_UI_HTML);
@@ -137,7 +137,7 @@ Response *handle_swagger_ui(Request *request) {
 
 Response *handle_openapi_json(Request *request) {
     (void)request;
-    Response *r = response_new("200 OK");
+    Response *r = response_new(HTTP_OK);
     if (!r) return NULL;
     response_add_header(r, "Content-Type: application/json; charset=utf-8");
     response_set_body(r, OPENAPI_SPEC);

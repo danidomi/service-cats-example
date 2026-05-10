@@ -39,5 +39,5 @@ RUN apk add --no-cache ca-certificates \
  && if [ "$DB" = "mysql" ]; then apk add --no-cache mariadb-connector-c; fi
 COPY --from=build /app/bin/service-cats-example /app/bin/service-cats-example
 
-EXPOSE 8080
+EXPOSE 8080 9090
 CMD ["/app/bin/service-cats-example"]

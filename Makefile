@@ -28,6 +28,7 @@ OBJS := \
     $(OUTPUT_DIR)/repository.o \
     $(OUTPUT_DIR)/converter.o \
     $(OUTPUT_DIR)/json_input.o \
+    $(OUTPUT_DIR)/app_metrics.o \
     $(OUTPUT_DIR)/service.o \
     $(OUTPUT_DIR)/controller.o \
     $(OUTPUT_DIR)/openapi.o \
@@ -66,6 +67,9 @@ $(OUTPUT_DIR)/repository.o: $(REPO_SRC)
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OUTPUT_DIR)/openapi.o: src/openapi/openapi.c
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(OUTPUT_DIR)/app_metrics.o: src/metrics/app_metrics.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean-deps:
