@@ -4,6 +4,7 @@
 
 #include "src/config/config.h"
 #include "src/controller/controller.h"
+#include "src/openapi/openapi.h"
 #include "src/repository/repository.h"
 
 int main(void) {
@@ -14,11 +15,13 @@ int main(void) {
     repository_init(&cfg);
     db_config_free(&cfg);
 
-    route_register(GET,    "/cats",     handle_list_cats);
-    route_register(POST,   "/cats",     handle_post_cat);
-    route_register(GET,    "/cats/:id", handle_get_cat);
-    route_register(PUT,    "/cats/:id", handle_put_cat);
-    route_register(DELETE, "/cats/:id", handle_delete_cat);
+    route_register(GET,    "/",             handle_swagger_ui);
+    route_register(GET,    "/openapi.json", handle_openapi_json);
+    route_register(GET,    "/cats",         handle_list_cats);
+    route_register(POST,   "/cats",         handle_post_cat);
+    route_register(GET,    "/cats/:id",     handle_get_cat);
+    route_register(PUT,    "/cats/:id",     handle_put_cat);
+    route_register(DELETE, "/cats/:id",     handle_delete_cat);
 
     int rc = server_run(port_from_env(PORT));
     repository_close();

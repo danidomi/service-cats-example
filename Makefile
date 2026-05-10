@@ -29,6 +29,7 @@ OBJS := \
     $(OUTPUT_DIR)/converter.o \
     $(OUTPUT_DIR)/service.o \
     $(OUTPUT_DIR)/controller.o \
+    $(OUTPUT_DIR)/openapi.o \
     $(OUTPUT_DIR)/main.o
 
 all: service-cats-example
@@ -58,6 +59,9 @@ $(OUTPUT_DIR)/cat.o: src/model/cat.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 $(OUTPUT_DIR)/repository.o: $(REPO_SRC)
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(OUTPUT_DIR)/openapi.o: src/openapi/openapi.c
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean-deps:
